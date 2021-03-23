@@ -86,6 +86,12 @@ def set_parallel_limit(environment):
             raise errors.UserError('COMPOSE_PARALLEL_LIMIT can not be less than 2')
         parallel.GlobalLimit.set_global_limit(parallel_limit)
 
+        # Each of parallel execution of multiple do() functions calls
+        # parallel execution of _execute_convergence_create.
+        # Global limit should be split between such cascade calls
+        # in order to avoid deadlock
+        parallel.DoLimit.set_global_limit(parallel_limit // 2)
+        parallel.ExecLimit.set_global_limit(parallel_limit // 2)
 
 def get_project_dir(options):
     override_dir = None
